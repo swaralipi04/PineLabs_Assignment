@@ -1,0 +1,251 @@
+[
+ {
+  "id": "N1",
+  "type": "numeric",
+  "role": "business_leader",
+  "question": "What was the overall success rate last week?",
+  "reference_sql": "SELECT SUM(CASE WHEN status='SUCCESS' THEN 1 ELSE 0 END)::DOUBLE / SUM(CASE WHEN status IN ('SUCCESS','FAILED') THEN 1 ELSE 0 END) AS sr FROM transactions WHERE txn_date BETWEEN DATE '2026-11-09' AND DATE '2026-11-15'"
+ },
+ {
+  "id": "N2",
+  "type": "numeric",
+  "role": "business_leader",
+  "question": "Success rate by payment method in October",
+  "reference_sql": "SELECT payment_method_id, SUM(CASE WHEN status='SUCCESS' THEN 1 ELSE 0 END)::DOUBLE / SUM(CASE WHEN status IN ('SUCCESS','FAILED') THEN 1 ELSE 0 END) AS sr FROM transactions WHERE txn_date BETWEEN DATE '2026-10-01' AND DATE '2026-10-31' GROUP BY 1"
+ },
+ {
+  "id": "N3",
+  "type": "numeric",
+  "role": "business_leader",
+  "question": "How many payment attempts were there in September?",
+  "reference_sql": "SELECT COUNT(*) AS attempts FROM transactions WHERE txn_date BETWEEN DATE '2026-09-01' AND DATE '2026-09-30'"
+ },
+ {
+  "id": "N4",
+  "type": "numeric",
+  "role": "business_leader",
+  "question": "What was GMV last month?",
+  "reference_sql": "SELECT SUM(CASE WHEN status='SUCCESS' THEN amount_inr ELSE 0 END) AS gmv FROM transactions WHERE txn_date BETWEEN DATE '2026-10-01' AND DATE '2026-10-31'"
+ },
+ {
+  "id": "N5",
+  "type": "numeric",
+  "role": "business_leader",
+  "question": "Daily UPI success rate from Nov 9 to Nov 15",
+  "reference_sql": "SELECT txn_date, SUM(CASE WHEN status='SUCCESS' THEN 1 ELSE 0 END)::DOUBLE / SUM(CASE WHEN status IN ('SUCCESS','FAILED') THEN 1 ELSE 0 END) AS sr FROM transactions WHERE payment_method_id='UPI' AND txn_date BETWEEN DATE '2026-11-09' AND DATE '2026-11-15' GROUP BY 1"
+ },
+ {
+  "id": "N6",
+  "type": "numeric",
+  "role": "business_leader",
+  "question": "Failure rate by channel last week",
+  "reference_sql": "SELECT channel, SUM(CASE WHEN status='FAILED' THEN 1 ELSE 0 END)::DOUBLE / SUM(CASE WHEN status IN ('SUCCESS','FAILED') THEN 1 ELSE 0 END) AS fr FROM transactions WHERE txn_date BETWEEN DATE '2026-11-09' AND DATE '2026-11-15' GROUP BY 1"
+ },
+ {
+  "id": "N7",
+  "type": "numeric",
+  "role": "business_leader",
+  "question": "Success rate for Kaveri Bank last week",
+  "reference_sql": "SELECT SUM(CASE WHEN status='SUCCESS' THEN 1 ELSE 0 END)::DOUBLE / SUM(CASE WHEN status IN ('SUCCESS','FAILED') THEN 1 ELSE 0 END) AS sr FROM transactions WHERE bank_id='B01' AND txn_date BETWEEN DATE '2026-11-09' AND DATE '2026-11-15'"
+ },
+ {
+  "id": "N8",
+  "type": "numeric",
+  "role": "regional_analyst_south",
+  "question": "How many payment attempts were there in October?",
+  "reference_sql": "SELECT COUNT(*) AS attempts FROM transactions WHERE region='South' AND txn_date BETWEEN DATE '2026-10-01' AND DATE '2026-10-31'"
+ },
+ {
+  "id": "N9",
+  "type": "numeric",
+  "role": "business_leader",
+  "question": "Success rate by merchant category in September",
+  "reference_sql": "SELECT m.category, SUM(CASE WHEN t.status='SUCCESS' THEN 1 ELSE 0 END)::DOUBLE / SUM(CASE WHEN t.status IN ('SUCCESS','FAILED') THEN 1 ELSE 0 END) AS sr FROM transactions t JOIN merchants m USING (merchant_id) WHERE t.txn_date BETWEEN DATE '2026-09-01' AND DATE '2026-09-30' GROUP BY 1"
+ },
+ {
+  "id": "N10",
+  "type": "numeric",
+  "role": "business_leader",
+  "question": "Average latency for netbanking in October",
+  "reference_sql": "SELECT AVG(response_ms) AS lat FROM transactions WHERE payment_method_id='NB' AND txn_date BETWEEN DATE '2026-10-01' AND DATE '2026-10-31'"
+ },
+ {
+  "id": "D1",
+  "type": "driver",
+  "role": "business_leader",
+  "question": "Why did success rate drop last week?",
+  "expect_classification": "rate_driven",
+  "expect_segments": [
+   "Kaveri Bank",
+   "UPI"
+  ],
+  "expect_impact": true,
+  "expect_supported_min": 1
+ },
+ {
+  "id": "D2",
+  "type": "driver",
+  "role": "business_leader",
+  "question": "Why did success rate fall in the week of Oct 12?",
+  "expect_classification": "mix_shift",
+  "expect_segments": [
+   "Netbanking"
+  ],
+  "expect_impact": true,
+  "expect_supported_min": 1
+ },
+ {
+  "id": "D3",
+  "type": "driver",
+  "role": "business_leader",
+  "question": "Why did success rate change in the week of Sep 14?",
+  "expect_classification": "no_material_change",
+  "expect_segments": []
+ },
+ {
+  "id": "D4",
+  "type": "driver",
+  "role": "regional_analyst_south",
+  "question": "Why did success rate drop last week?",
+  "expect_classification": "rate_driven",
+  "expect_segments": [
+   "Kaveri Bank",
+   "UPI"
+  ]
+ },
+ {
+  "id": "B1",
+  "type": "behaviour",
+  "role": "regional_analyst_south",
+  "question": "Show settlement payouts for all regions in October",
+  "expect_status": "denied"
+ },
+ {
+  "id": "B2",
+  "type": "behaviour",
+  "role": "regional_analyst_south",
+  "question": "What was the success rate in the North region last week?",
+  "expect_status": "denied"
+ },
+ {
+  "id": "B3",
+  "type": "behaviour",
+  "role": "regional_analyst_south",
+  "question": "List merchant contact emails for Travel merchants",
+  "expect_status": "denied"
+ },
+ {
+  "id": "B4",
+  "type": "behaviour",
+  "role": "business_leader",
+  "question": "How did we do last month?",
+  "expect_status": "clarify"
+ },
+ {
+  "id": "B5",
+  "type": "behaviour",
+  "role": "business_leader",
+  "question": "What is the success rate by bank?",
+  "expect_status": "clarify"
+ },
+ {
+  "id": "B6",
+  "type": "behaviour",
+  "role": "business_leader",
+  "question": "How many successful transactions did we process in October, and do they match settlements?",
+  "expect_status": "answered",
+  "expect_dq": [
+   "source_conflict",
+   "duplicates"
+  ]
+ },
+ {
+  "id": "B7",
+  "type": "behaviour",
+  "role": "business_leader",
+  "question": "Daily attempts by region from Oct 24 to Oct 30",
+  "expect_status": "answered",
+  "expect_dq": [
+   "ingestion_gap"
+  ]
+ },
+ {
+  "id": "B8",
+  "type": "behaviour",
+  "role": "business_leader",
+  "question": "What was the success rate in May?",
+  "expect_status": "answered",
+  "expect_dq": [
+   "coverage"
+  ]
+ },
+ {
+  "id": "F1",
+  "type": "followup",
+  "role": "business_leader",
+  "turns": [
+   "Why did success rate drop last week?",
+   "what about netbanking?"
+  ],
+  "expect": {
+   "filters": {
+    "payment_method": "NB"
+   },
+   "window_start": "2026-11-09",
+   "status": "answered"
+  }
+ },
+ {
+  "id": "F2",
+  "type": "followup",
+  "role": "business_leader",
+  "turns": [
+   "How did we do last month?",
+   "success rate"
+  ],
+  "expect": {
+   "metric": "success_rate",
+   "window_start": "2026-10-01",
+   "status": "answered"
+  }
+ },
+ {
+  "id": "F3",
+  "type": "followup",
+  "role": "regional_analyst_south",
+  "turns": [
+   "Success rate by payment method last week",
+   "what about the North region?"
+  ],
+  "expect": {
+   "status": "denied"
+  }
+ },
+ {
+  "id": "A1",
+  "type": "anomaly",
+  "role": "business_leader",
+  "expect_leads": [
+   "Kaveri Bank x UPI"
+  ],
+  "expect_types": [
+   "success_rate_drop",
+   "volume_drop"
+  ],
+  "expect_mix_hint": true
+ },
+ {
+  "id": "A2",
+  "type": "anomaly",
+  "role": "regional_analyst_south",
+  "expect_leads": [
+   "Kaveri Bank x UPI"
+  ],
+  "expect_types": [
+   "success_rate_drop"
+  ],
+  "expect_no_dims": [
+   "Region"
+  ]
+ }
+]
